@@ -2,16 +2,22 @@ from socket import *
 import threading
 import sys
 
-print 'Launched http server'
+'''
+    Implemented:
+        - GET
+        - HEAD
+'''
+
+print 'Launched HTTP server'
 server_socket = socket(AF_INET, SOCK_STREAM)
 server_socket.bind(('localhost', 8080))
 server_socket.listen(10)
 
-print('Bound and listening.')
+print('Bound and listening')
 
-while True:
+run_server = True
+while run_server:
     cs, user_addr = server_socket.accept()
-    #print 'New connection from', user_addr[0]
 
     request = cs.recv(1024)
     req_lines = request.split('\n')
@@ -22,7 +28,7 @@ while True:
     if page == '/' or page == '': page = 'index.html'
     print 'method,', method, ' ', 'requested,',page
 
-    f = open(page, 'r')
+    f = open('templates/' + page, 'r')
     html = f.read().encode('utf-8')
     length = len(html)
 
