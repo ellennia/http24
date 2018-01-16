@@ -1,5 +1,4 @@
 from socket import *
-import threading
 import sys
 
 server_name = 'http24'
@@ -45,7 +44,7 @@ def setup_server(application):
         content = application(environ, start_response)
         for i in content:
             rbody += i + '\n'
-        response = 'HTTP/1.0 200 OK \n'
+        response = 'HTTP/1.0 '+ out_status + '\n'
         for header in out_response:
             response += header[0] +': ' + header[1] + '\n'
         response += 'Connection: close\n'
