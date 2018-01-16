@@ -15,21 +15,14 @@ def setup_server(application):
     run_server = True
 
     while run_server:
-        cs, user_addr = server_socket.accept()
+        conn, user_addr = server_socket.accept()
+
+        request = conn.recv(1024)
+        (method, page, status) = request.splitlines()[0].split()
+        if page == '': page = '/'
+        print 'method,', method, ' : ', 'requested,',page
 
         environ = {}
-
-        request = cs.recv(1024)
-        requestlns = request.splitlines()
-        primary = requestlns[0]
-
-        primons = primary.split()
-        method = primons[0]
-        page = primons[1][1:]
-
-        if page == '': page = '/'
-        print 'method,', method, '::', 'requested,',page
-
         environ['wsgi.errors'] = sys.stderr
         environ['wsgi.input'] = None
         environ['wsgi.multiprocess'] = False
@@ -37,7 +30,6 @@ def setup_server(application):
         environ['wsgi.url_scheme'] = 'http'
         environ['wsgi.version'] = (1,0)
         environ['wsgi.run_once'] = False
-
         environ['REQUEST_METHOD'] = method
         environ['PATH_INFO'] = page
         environ['SERVER_NAME'] = 'localhost'
@@ -47,22 +39,19 @@ def setup_server(application):
         def start_response(status, response_headers):
             global out_status
             global out_response
-
             out_status = status
             out_response = response_headers
-
         rbody = ''
         content = application(environ, start_response)
         for i in content:
             rbody += i + '\n'
-
         response = 'HTTP/1.0 200 OK \n'
         for header in out_response:
             response += header[0] +': ' + header[1] + '\n'
         response += 'Connection: close\n'
         response += '\n\n'
         response += rbody
-        cs.send(response)
+        conn.send(response)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
