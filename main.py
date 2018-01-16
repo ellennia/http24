@@ -1,8 +1,15 @@
+'''
+    http24
+
+    A WSGI http server created, with the exception of some tweeks, in 24 hours.
+    It is single-threaded.
+'''
+
 from socket import *
 import sys
 
 server_name = 'http24'
-port = 8080
+port = 80
 
 def setup_server(application):
     print 'Launched {} server.'.format(server_name)
@@ -54,7 +61,7 @@ def setup_server(application):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        sys.exit('Requires a WSGI application to be provided.')
+        sys.exit('http24 requires a WSGI application to be provided as an argument.')
 
     app = sys.argv[1]
     module_name, app_field = app.split(':')
