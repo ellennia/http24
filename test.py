@@ -8,4 +8,4 @@ def test():
 
 @app.route('/other')
 def other():
-    return 'weird'
+    return 'This is another page, not rendered from a template.'

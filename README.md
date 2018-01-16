@@ -1,6 +1,6 @@
 # http24
 
-Ellen's own WSGI HTTP server. Written in one day.
+Ellen's own WSGI HTTP server. Functionality written in one day, with some minor touch-ups after the fact.
 
 #### main.py | The WSGI HTTP server.
 #### test.py | A flask WSGI application.
