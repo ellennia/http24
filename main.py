@@ -68,15 +68,12 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         sys.exit('Requires a WSGI application to be provided.')
 
-    print 'Launched server with external applciation'
-
     app = sys.argv[1]
     module_name, app_field = app.split(':')
-    print module_name, app_field
 
     module = __import__(module_name)
     application = getattr(module, app_field)
 
-    print 'All has been obtained'
+    print 'Module: ' + module_name + ' | App: ' + app_field + ' | Loaded'
     setup_server(application)
 

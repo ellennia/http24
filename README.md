@@ -1,6 +1,6 @@
-Ellen's own custom HTTP server. Written in one day of overtired furvor.
+# http24
 
-Written with vim and wikipedia
+Ellen's own WSGI HTTP server. Written in one day.
 
 #### main.py | The WSGI HTTP server.
 #### test.py | A flask WSGI application.
