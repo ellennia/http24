@@ -2,66 +2,81 @@ from socket import *
 import threading
 import sys
 
-'''
-    Implemented:
-        - GET
-        - HEAD
-'''
-
 server_name = 'http24'
 port = 8080
 
-print 'Launched {} server.'.format(server_name)
-server_socket = socket(AF_INET, SOCK_STREAM)
-server_socket.bind(('localhost', port))
-server_socket.listen(1)
+def setup_server(application):
+    print 'Launched {} server.'.format(server_name)
+    server_socket = socket(AF_INET, SOCK_STREAM)
+    server_socket.bind(('localhost', port))
+    server_socket.listen(1)
+    print('Bound @ {} and listening'.format(str(port)))
 
-print('Bound @ {} and listening'.format(str(port)))
+    run_server = True
 
-def test_application(environ, start_response):
-    pass
+    while run_server:
+        cs, user_addr = server_socket.accept()
 
-run_server = True
-while run_server:
-    cs, user_addr = server_socket.accept()
+        environ = {}
 
-    environ = {}
+        request = cs.recv(1024)
+        requestlns = request.splitlines()
+        primary = requestlns[0]
 
-    request = cs.recv(1024)
-    requestlns = request.splitlines()
+        primons = primary.split()
+        method = primons[0]
+        page = primons[1][1:]
 
-    primons = primary.split()
-    method = primons[0]
-    page = primons[1][1:]
+        if page == '': page = '/'
+        print 'method,', method, '::', 'requested,',page
 
-    environ['wsgi.errors'] = sys.stderr
-    environ['wsgi.input'] = sys.stdin.buffer
-    environ['wsgi.multiprocess'] = False
-    environ['wsgi.multithread'] = False
-    environ['wsgi.version'] = (1,0)
-    environ['wsgi.run_once'] = False
+        environ['wsgi.errors'] = sys.stderr
+        environ['wsgi.input'] = None
+        environ['wsgi.multiprocess'] = False
+        environ['wsgi.multithread'] = False
+        environ['wsgi.url_scheme'] = 'http'
+        environ['wsgi.version'] = (1,0)
+        environ['wsgi.run_once'] = False
 
-    environ['REQUEST_METHOD'] = method
-    environ['PATH_INFO'] = page
-    environ['SERVER_NAME'] = 'http24'
-    environ['SERVER_PORT'] = str(port)
-    environ['CONTENT_LENGTH'] = len(request)
+        environ['REQUEST_METHOD'] = method
+        environ['PATH_INFO'] = page
+        environ['SERVER_NAME'] = 'localhost'
+        environ['SERVER_PORT'] = str(port)
+        environ['CONTENT_LENGTH'] = len(request)
 
-    print 'method,', method, ' :: ', 'requested,',page
+        def start_response(status, response_headers):
+            global out_status
+            global out_response
 
-    out_status = None
-    out_response = None
+            out_status = status
+            out_response = response_headers
 
-    def start_response(status, response_headers):
-        out_status = status
-        out_response = response_headers
+        rbody = ''
+        content = application(environ, start_response)
+        for i in content:
+            rbody += i + '\n'
 
-    content = application(environ, start_response)
-
-    response = 'HTTP/1.0' + out_status + '\n'
-    response += content
-    cs.send(response)
+        response = 'HTTP/1.0 200 OK \n'
+        for header in out_response:
+            response += header[0] +': ' + header[1] + '\n'
+        response += 'Connection: close\n'
+        response += '\n\n'
+        response += rbody
+        cs.send(response)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         sys.exit('Requires a WSGI application to be provided.')
+
+    print 'Launched server with external applciation'
+
+    app = sys.argv[1]
+    module_name, app_field = app.split(':')
+    print module_name, app_field
+
+    module = __import__(module_name)
+    application = getattr(module, app_field)
+
+    print 'All has been obtained'
+    setup_server(application)
+
