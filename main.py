@@ -1,8 +1,7 @@
 '''
     http24
 
-    A WSGI http server created, with the exception of some tweaks, in 24 hours.
-    It is single-threaded.
+    A single-threaded WSGI HTTP server created, with the exception of some tweaks, in 24 hours.
 '''
 
 from socket import *
@@ -46,17 +45,19 @@ def setup_server(application):
             global out_response
             out_status = status
             out_response = response_headers
-        rbody = ''
+            
+        html_content = ''
         content = application(environ, start_response)
         for i in content:
-            rbody += i + '\n'
+            html_content += i + '\n'
         response = 'HTTP/1.0 '+ out_status + '\n'
         for header in out_response:
             response += header[0] +': ' + header[1] + '\n'
         response += 'Connection: close\n'
         response += '\n\n'
-        response += rbody
+        response += html_content
         conn.send(response)
+        conn.close()
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
