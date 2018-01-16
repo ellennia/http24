@@ -1,7 +1,7 @@
 '''
     http24
 
-    A WSGI http server created, with the exception of some tweeks, in 24 hours.
+    A WSGI http server created, with the exception of some tweaks, in 24 hours.
     It is single-threaded.
 '''
 
@@ -12,21 +12,20 @@ server_name = 'http24'
 port = 80
 
 def setup_server(application):
-    print 'Launched {} server.'.format(server_name)
     server_socket = socket(AF_INET, SOCK_STREAM)
     server_socket.bind(('localhost', port))
     server_socket.listen(1)
-    print('Bound @ {} and listening'.format(str(port)))
+    print('Server bound on port {} and listening'.format(str(port)))
+    print('-------------------------------------------------')
 
     run_server = True
-
     while run_server:
         conn, user_addr = server_socket.accept()
 
         request = conn.recv(1024)
         (method, page, status) = request.splitlines()[0].split()
         if page == '': page = '/'
-        print 'method,', method, ' : ', 'requested,',page
+        print 'Method,', method, '|', 'Page requested:',page
 
         environ = {}
         environ['wsgi.errors'] = sys.stderr
