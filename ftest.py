@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def test():
-    return '<center><h1><i>Hi people!</i></h1></center>'
+    return render_template('index.html')
 
 @app.route('/other')
 def other():
